@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 import React from "react";
 
 var UserStateContext = React.createContext();
@@ -18,7 +18,7 @@ function userReducer(state, action) {
 
 function UserProvider({ children }) {
   var [state, dispatch] = React.useReducer(userReducer, {
-    isAuthenticated: !!localStorage.getItem("id_token"),
+    isAuthenticated: !!localStorage.getItem("token"),
   });
 
   return (
@@ -54,26 +54,30 @@ function loginUser(dispatch, login, password, history, setIsLoading, setError) {
   setError(false);
   setIsLoading(true);
 
-  axios.post();
 
-  if (!!login && !!password) {
-    setTimeout(() => {
-      localStorage.setItem('id_token', 1)
+  const request = {
+    username: login,
+    password: password,
+  };
+  axios.post("/login", request).then(
+    res => {
+      localStorage.setItem("token", res.data);
       setError(null)
       setIsLoading(false)
       dispatch({ type: 'LOGIN_SUCCESS' })
 
       history.push('/app/dashboard')
-    }, 2000);
-  } else {
-    dispatch({ type: "LOGIN_FAILURE" });
-    setError(true);
-    setIsLoading(false);
-  }
+    },
+    _err => {
+      setError(true);
+      setIsLoading(false);
+    },
+  );
+
 }
 
 function signOut(dispatch, history) {
-  localStorage.removeItem("id_token");
+  localStorage.removeItem("token");
   dispatch({ type: "SIGN_OUT_SUCCESS" });
   history.push("/login");
 }
